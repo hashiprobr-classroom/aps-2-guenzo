@@ -36,6 +36,54 @@ void nft_inverse(complex t[], complex s[], int n) {
 }
 
 void fft(complex s[], complex t[], int n, int sign) {
+    complex s_i[n/2];
+    complex s_p[n/2];
+    complex t_p[n/2]; 
+    complex t_i[n/2]; 
+    int eh_par; 
+    int index_par = 0;
+    int index_impar = 0;
+
+    // caso de parada
+    if (n == 1){
+        t[0] = s[0];
+        return;
+    }
+
+    // implementando sp e si : 
+    for (int index = 0; index < n; index++){
+        eh_par = index%2 == 0;
+        if(eh_par){
+            s_p[index_par] = s[index];
+            index_par++;
+        }else{
+            s_i[index_impar] = s[index];
+            index_impar++;
+        }
+
+    }
+
+    // tp recursivo, usando sp: 
+    fft(s_p,t_p,n/2,sign);
+    
+    // ti recursivo usando si:
+    fft(s_i,t_i,n/2,sign);
+    
+    // fixando k para uma somatoria
+    for (int k = 0; k < n/2; k++){
+        double x = (sign * 2 * PI * k)/n;
+        double cosx = cos(x);
+        double sinx = sin(x);
+
+        t[k].a = t_p[k].a + t_i[k].a * cosx - t_i[k].b*sinx;
+        t[k].b = t_p[k].b + t_i[k].a*sinx + t_i[k].b*cosx;
+        
+        t[k+n/2].a = t_p[k].a - t_i[k].a * cosx + t_i[k].b*sinx;
+        t[k+n/2].b = t_p[k].b - t_i[k].a*sinx - t_i[k].b*cosx;
+        
+    }
+
+
 }
 
 void fft_forward(complex s[], complex t[], int n) {
