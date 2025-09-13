@@ -69,7 +69,7 @@ void fft(complex s[], complex t[], int n, int sign) {
     // ti recursivo usando si:
     fft(s_i,t_i,n/2,sign);
     
-    // fixando k para uma somatoria
+    // fixando k para uma somatoria 
     for (int k = 0; k < n/2; k++){
         double x = (sign * 2 * PI * k)/n;
         double cosx = cos(x);
@@ -96,9 +96,53 @@ void fft_inverse(complex t[], complex s[], int n) {
 }
 
 void fft_forward_2d(complex matrix[MAX_SIZE][MAX_SIZE], int width, int height) {
+    complex lista_saida[width];
+    complex lista_coluna[height];
+    complex lista_saida_coluna[height];
+
+    // varre todas as linhas
+    for (int linha = 0; linha < height ; linha++){
+        fft_forward(matrix[linha],lista_saida,width);
+        for (int coluna = 0; coluna < width; coluna++){
+                matrix[linha][coluna] = lista_saida[coluna];
+            }
+    }
+
+    // varre todas colunas
+    for (int coluna = 0; coluna < width ; coluna++){
+        for (int linha = 0; linha < height; linha++){
+            lista_coluna[linha] = matrix[linha][coluna];
+        }
+        fft_forward(lista_coluna,lista_saida_coluna,height);
+        for (int linha = 0; linha < height; linha++){
+            matrix[linha][coluna] = lista_saida_coluna[linha];
+        }
+    }        
 }
 
 void fft_inverse_2d(complex matrix[MAX_SIZE][MAX_SIZE], int width, int height) {
+    complex lista_saida[width];
+    complex lista_saida_coluna[height];
+    complex lista_coluna[height];
+
+    // varre todas colunas
+    for (int coluna = 0; coluna < width ; coluna++){
+        for (int linha =0; linha < height; linha++){
+            lista_coluna[linha] = matrix[linha][coluna];
+        }
+        fft_inverse(lista_coluna,lista_saida_coluna,height);
+        for (int linha = 0; linha < height; linha++){
+            matrix[linha][coluna] = lista_saida_coluna[linha];
+        }
+    }   
+
+    // varre todas as linhas
+    for (int linha = 0; linha < height ; linha++){
+        fft_inverse(matrix[linha],lista_saida,width);
+        for (int coluna = 0; coluna < width; coluna++){
+                matrix[linha][coluna] = lista_saida[coluna];
+            }
+    }
 }
 
 void filter(complex input[MAX_SIZE][MAX_SIZE], complex output[MAX_SIZE][MAX_SIZE], int width, int height, int flip) {
